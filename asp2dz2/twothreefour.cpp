@@ -74,6 +74,7 @@ void TwoThreeFour::addKey(Process *p) {
 			right->setParent(prev->getParent());
 			left->addKey(keys.at(0));
 			right->addKey(keys.at(2));
+			//novi kljuc se dodaje u onaj cvor cijem je kljucu blizi
 			addLeft = abs(keys.at(0)->getWaitingTime() - p->getWaitingTime()) < abs(keys.at(2)->getWaitingTime() - p->getWaitingTime()) ? true : false;
 			if (addLeft) {
 				left->addKey(p);
