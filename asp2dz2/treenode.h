@@ -12,8 +12,10 @@ public:
 	TreeNode* getNextWait(const long time) const;
 	TreeNode* getNextExec(const long time) const;
 	TreeNode* getParent() const;
-	void addKey(const Process *key);
-	void addNode(const TreeNode *node);
+	std::vector<Process*> getKeys() const;
+	std::vector<TreeNode*> getSons() const;
+	void setParent(TreeNode *parent);
+	void addKey(Process *key);
 	void removeKey(const Process *key);
 	void removeNode(TreeNode *node);
 
