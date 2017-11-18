@@ -20,7 +20,6 @@ const Process* TreeNode::findKeyWait(const long time) const {
 	return nullptr;
 }
 
-
 const Process* TreeNode::findKeyExec(const long time) const {
 	for (auto key : keys) {
 		if (key->getExecutionTime() == time) {
@@ -45,7 +44,6 @@ std::vector<TreeNode*> TreeNode::getSons() const {
 void TreeNode::setParent(TreeNode *parent) {
 	this->parent = parent;
 }
-
 
 void TreeNode::addKey(Process* key) {
 	keys.push_back(key);
@@ -89,3 +87,26 @@ TreeNode* TreeNode::getNextExec(const long time) const {
 	}
 	return sons.at(sons.size());
 }
+
+void TreeNode::moveSons(const int disp) {
+	int d = disp;
+
+	if (disp == 1 && sons.size() == 2 || disp == 2 && sons.size() == 3) {
+		while (disp >= 0) {
+			sons.at(d + 1) = sons.at(d);
+			d--;
+		}
+	}
+	else {
+		d = 2;
+		while (d > 0) {
+			sons.at(d + 1) = sons.at(d);
+			d--;
+		}
+	}
+}
+
+void TreeNode::setSon(const int pos, TreeNode* node) {
+	sons.at(pos) = node;
+}
+

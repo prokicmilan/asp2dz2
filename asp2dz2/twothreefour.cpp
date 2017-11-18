@@ -58,7 +58,8 @@ void TwoThreeFour::addKey(Process *p) {
 		}
 		//broj kljuceva u listu
 		auto keys = prev->getKeys();
-		const int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; });
+		//da li ovo moze sa keys.size()?
+		int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; });
 		//ima mesta za dodavanje novog kljuca
 		if (cnt < 3) {
 			prev->addKey(p);
@@ -81,6 +82,23 @@ void TwoThreeFour::addKey(Process *p) {
 			}
 			else {
 				right->addKey(p);
+			}
+			curr = prev->getParent();
+			while (curr != nullptr) {
+				keys = curr->getKeys();
+				//keys.size()?
+				cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; });
+				if (cnt < 3) {
+					curr->addKey(extra);
+					int newPos = std::find(keys.begin(), keys.end(), extra) - keys.begin();
+					int disp = keys.size() - 1 - newPos;
+					curr->moveSons(disp);
+					curr->setSon(newPos, left);
+					curr->setSon(newPos + 1, right);
+				}
+				else {
+
+				}
 			}
 		}
 	}

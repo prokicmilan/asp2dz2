@@ -16,6 +16,8 @@ public:
 	std::vector<TreeNode*> getSons() const;
 	void setParent(TreeNode *parent);
 	void addKey(Process *key);
+	void moveSons(const int disp);
+	void setSon(const int pos, TreeNode *node);
 	void removeKey(const Process *key);
 	void removeNode(TreeNode *node);
 
