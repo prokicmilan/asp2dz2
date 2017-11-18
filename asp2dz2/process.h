@@ -4,7 +4,8 @@
 
 class Process {
 public:
-	Process(const std::string &name, const long timeToCopmlete, const long maxWaitingTime);
+	Process(const std::string &name, long timeToCopmlete, long maxWaitingTime);
+	Process(const Process &p) = default;
 	
 	//getters
 	std::string getName() const;

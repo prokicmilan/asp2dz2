@@ -1,13 +1,65 @@
 #include "treenode.h"
 #include <algorithm>
+#include <array>
+
+void TreeNode::copy(const TreeNode& tn) {
+	for (int i = 0; i < keys.size(); i++) {
+		keys[i] = tn.keys[i];
+	}
+	for (int i = 0; i < sons.size(); i++) {
+		sons[i] = tn.sons[i];
+	}
+}
+
+void TreeNode::move(TreeNode& tn) {
+	keys = tn.keys;
+	for (auto &key : tn.keys) {
+		key = nullptr;
+	}
+	sons = tn.sons;
+	for (auto &son : tn.sons) {
+		son = nullptr;
+	}
+}
 
 TreeNode::TreeNode() {
 	parent = nullptr;
-	for (auto i = 0; i < 3; i++) {
-		keys.at(i) = nullptr;
+	for (auto i = 0; i < keys.size(); i++) {
+		keys[i] = nullptr;
 	}
-	for (auto i = 0; i < 4; i++) {
-		keys.at(i) = nullptr;
+	for (auto i = 0; i < sons.size(); i++) {
+		sons[i] = nullptr;
+	}
+}
+
+TreeNode::TreeNode(const TreeNode& tn) {
+	copy(tn);
+}
+
+TreeNode::TreeNode(TreeNode&& tn) {
+	move(tn);
+}
+
+TreeNode& TreeNode::operator=(const TreeNode &tn) {
+	if (this != &tn) {
+		copy(tn);
+	}
+	return *this;
+}
+
+TreeNode& TreeNode::operator=(TreeNode &&tn) {
+	if (this != &tn) {
+		move(tn);
+	}
+	return *this;
+}
+
+TreeNode::~TreeNode() {
+	for (auto &key : keys) {
+		key = nullptr;
+	}
+	for (auto &son : sons) {
+		son = nullptr;
 	}
 }
 
@@ -33,11 +85,11 @@ TreeNode* TreeNode::getParent() const {
 	return parent;
 }
 
-std::vector<Process*> TreeNode::getKeys() const {
+std::array<Process*, 3> TreeNode::getKeys() const {
 	return keys;
 }
 
-std::vector<TreeNode*> TreeNode::getSons() const {
+std::array<TreeNode*, 4> TreeNode::getSons() const {
 	return sons;
 }
 
@@ -46,46 +98,56 @@ void TreeNode::setParent(TreeNode *parent) {
 }
 
 void TreeNode::addKey(Process* key) {
-	keys.push_back(key);
-	std::sort(keys.begin(), keys.end(), [](Process *ptrA, Process *ptrB) { if (ptrA != nullptr && ptrB != nullptr) { return ptrA->getWaitingTime() < ptrB->getWaitingTime(); }});
+	keys[2] = key;
+	//std::sort(keys.begin(), keys.end(), [](Process *ptrA, Process *ptrB) { if (ptrA != nullptr && ptrB != nullptr) return ptrA->getWaitingTime() <= ptrB->getWaitingTime(); else return false; });
+	for (int i = 0; i < keys.size() - 1; i++) {
+		for (int j = i + 1; j < keys.size(); j++) {
+			if (keys[i] == nullptr) {
+				swap(&keys[i], &keys[j]);
+			}
+			else if (keys[j] != nullptr && keys[i]->getWaitingTime() > keys[j]->getWaitingTime()) {
+				swap(&keys[i], &keys[j]);
+			}
+		}
+	}
 }
 
 //metoda koja vraca pokazivac na sledeci cvor u kom se potencijalno moze naci trazeni kljuc
 TreeNode* TreeNode::getNextWait(const long time) const {
 	//ako je trazeni kljuc manji od prvog, vraca se pokazivac na krajnji levi cvor
-	if (time < keys.at(0)->getWaitingTime()) {
-		return sons.at(0);
+	if (time < keys[0]->getWaitingTime()) {
+		return sons[0];
 	}
 	for (auto i = 0; i < keys.size() - 1; i++) {
-		if (keys.at(i + 1) != nullptr) {
-			if (keys.at(i)->getWaitingTime() < time && keys.at(i + 1)->getWaitingTime() > time) {
+		if (keys[i + 1] != nullptr) {
+			if (keys[i]->getWaitingTime() < time && keys[i + 1]->getWaitingTime() > time) {
 				//ako je trazeni kljuc izmedju dva kljuca, vraca se pokazivac na cvor izmedju njih
-				return sons.at(i + 1);
+				return sons[i + 1];
 			}
 		}
 		else {
 			//ako naredni kljuc ne postoji, vraca se pokazivac na cvor desno od prethodnog
-			return sons.at(i + 1);
+			return sons[i + 1];
 		}
 	}
-	return sons.at(sons.size());
+	return sons[sons.size() - 1];
 }
 
 TreeNode* TreeNode::getNextExec(const long time) const {
-	if (time < keys.at(0)->getExecutionTime()) {
-		return sons.at(0);
+	if (time < keys[0]->getExecutionTime()) {
+		return sons[0];
 	}
 	for (int i = 0; i < keys.size() - 1; i++) {
-		if (keys.at(i + 1) != nullptr) {
-			if (keys.at(i)->getExecutionTime() < time && keys.at(i + 1)->getWaitingTime() > time) {
-				return sons.at(i + 1);
+		if (keys[i + 1] != nullptr) {
+			if (keys[i]->getExecutionTime() < time && keys[i + 1]->getExecutionTime() > time) {
+				return sons[i + 1];
 			}
 		}
 		else {
-			return sons.at(i + 1);
+			return sons[i + 1];
 		}
 	}
-	return sons.at(sons.size());
+	return sons[sons.size()];
 }
 
 void TreeNode::moveSons(const int disp) {
@@ -93,20 +155,20 @@ void TreeNode::moveSons(const int disp) {
 
 	if (disp == 1 && sons.size() == 2 || disp == 2 && sons.size() == 3) {
 		while (disp >= 0) {
-			sons.at(d + 1) = sons.at(d);
+			sons[d + 1] = sons[d];
 			d--;
 		}
 	}
 	else {
 		d = 2;
 		while (d > 0) {
-			sons.at(d + 1) = sons.at(d);
+			sons[d + 1] = sons[d];
 			d--;
 		}
 	}
 }
 
 void TreeNode::setSon(const int pos, TreeNode* node) {
-	sons.at(pos) = node;
+	sons[pos] = node;
 }
 

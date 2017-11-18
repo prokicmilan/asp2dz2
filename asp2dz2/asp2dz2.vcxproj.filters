@@ -35,5 +35,8 @@
     <ClCompile Include="twothreefour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dz2p1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

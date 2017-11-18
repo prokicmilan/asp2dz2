@@ -151,6 +151,7 @@
     <ClInclude Include="twothreefour.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dz2p1.cpp" />
     <ClCompile Include="process.cpp" />
     <ClCompile Include="treenode.cpp" />
     <ClCompile Include="twothreefour.cpp" />

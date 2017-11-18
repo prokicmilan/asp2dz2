@@ -1,6 +1,6 @@
 #include "process.h"
 
-Process::Process(const std::string & name, const long timeToCopmlete, const long maxWaitingTime) {
+Process::Process(const std::string & name, long timeToComplete, long maxWaitingTime) {
 	this->name = name;
 	this->timeToComplete = timeToComplete;
 	this->maxWaitingTime = maxWaitingTime;
