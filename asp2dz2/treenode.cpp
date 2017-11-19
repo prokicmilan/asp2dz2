@@ -89,16 +89,7 @@ std::array<TreeNode*, 4> TreeNode::getSons() const {
 
 void TreeNode::addKey(Process* key) {
 	keys[2] = key;
-	for (int i = 0; i < keys.size() - 1; i++) {
-		for (int j = i + 1; j < keys.size(); j++) {
-			if (keys[i] == nullptr) {
-				swap(&keys[i], &keys[j]);
-			}
-			else if (keys[j] != nullptr && keys[i]->getWaitingTime() > keys[j]->getWaitingTime()) {
-				swap(&keys[i], &keys[j]);
-			}
-		}
-	}
+	sort();
 }
 
 //metoda koja vraca pokazivac na sledeci cvor u kom se potencijalno moze naci trazeni kljuc
@@ -143,4 +134,36 @@ void TreeNode::moveSons(const int disp) {
 void TreeNode::setSon(const int pos, TreeNode* node) {
 	sons[pos] = node;
 }
+
+void TreeNode::removeKey(int pos) {
+	delete keys[pos];
+	keys[pos] = nullptr;
+	sort();
+}
+
+
+TreeNode* TreeNode::getBrother(TreeNode *parent, bool left) {
+	auto parentSons = parent->getSons();
+	for (int i = 0; i < parentSons.size(); i++) {
+		if (parentSons[i] == this) {
+			if (left) {
+				if (i > 0) {
+					return parentSons[i - 1];
+				}
+				else {
+					return nullptr;
+				}
+			}
+			else {
+				if (i < parentSons.size() - 1) {
+					return parentSons[i + 1];
+				}
+				else {
+					return nullptr;
+				}
+			}
+		}
+	}
+}
+
 

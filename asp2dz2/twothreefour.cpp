@@ -129,6 +129,82 @@ void TwoThreeFour::addKey(Process* p) {
 	}
 }
 
+void TwoThreeFour::delKey(Process* p) {
+	TreeNode *curr = nullptr;
+	TreeNode *prev = nullptr;
+
+	if (root != nullptr) {
+		curr = root;
+		while (curr != nullptr && curr->find(p) != -1) {
+			auto keys = curr->getKeys();
+			auto sons = curr->getSons();
+			if (curr != root) {
+				int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) {return ptr != nullptr; });
+				if (cnt == 1) {
+					TreeNode *rightBrother = curr->getBrother(prev, false);
+					TreeNode *leftBrother = curr->getBrother(prev, true);
+					bool right = false;
+					bool left = false;
+					bool borrowed = false;
+					if (rightBrother != nullptr) {
+						auto brotherKeys = rightBrother->getKeys();
+						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
+						if (brotherCnt > 1) {
+							right = true;
+						}
+					}
+					if (leftBrother != nullptr) {
+						auto brotherKeys = leftBrother->getKeys();
+						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
+						if (brotherCnt > 1) {
+							left = true;
+						}
+					}
+					if (right) {
+						auto parentKeys = prev->getKeys();
+						int pos;
+						for (pos = parentKeys.size() - 1; pos > 0; pos--) {
+							if (parentKeys[pos] != nullptr) {
+								break;
+							}
+						}
+						curr->addKey(new Process(*parentKeys[pos]));
+						prev->removeKey(pos);
+						prev->addKey(new Process(*const_cast<Process*>(rightBrother->getKeys()[0])));
+						rightBrother->removeKey(0);
+						//prevezi pokazivace
+					}
+					else {
+						if (left) {
+							curr->addKey(new Process(*const_cast<Process*>(prev->getKeys()[0])));
+							prev->removeKey(0);
+							auto brotherKeys = leftBrother->getKeys();
+							int pos;
+							for (pos = brotherKeys.size() - 1; pos > 0; pos--) {
+								if (brotherKeys[pos] != nullptr) {
+									break;
+								}
+							}
+							prev->addKey(new Process(*brotherKeys[pos]));
+							leftBrother->removeKey(pos);
+							//prevezi pokazivace
+						}
+					}
+				}
+			}
+			prev = curr;
+			curr = curr->getNextWait(p->getWaitingTime());
+		}
+		if (curr == nullptr) {
+			return;
+		}
+		else {
+			
+		}
+	}
+}
+
+
 std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 	int level = 1;
 	int cnt = 0;
