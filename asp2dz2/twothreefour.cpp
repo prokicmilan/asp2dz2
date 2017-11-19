@@ -1,11 +1,31 @@
 #pragma once
 
 #include "twothreefour.h"
-#include <algorithm>
+#include <vector>
 
 TwoThreeFour::TwoThreeFour() {
 	root = nullptr;
 }
+
+TwoThreeFour::~TwoThreeFour() {
+	TreeNode *curr = nullptr;
+	std::vector<TreeNode*> next;
+
+	next.insert(next.begin(), root);
+	while (!next.empty()) {
+		curr = next.back();
+		next.pop_back();
+		auto sons = curr->getSons();
+		for (auto son : sons) {
+			if (son != nullptr) {
+				next.insert(next.begin(), son);
+			}
+		}
+		delete curr;
+	}
+	root = nullptr;
+}
+
 
 const Process* TwoThreeFour::findKeyWait(const long time) const {
 	TreeNode *curr = nullptr;
@@ -57,17 +77,15 @@ void TwoThreeFour::addKey(Process* p) {
 			if (cnt == 3) {
 				TreeNode *left = new TreeNode();
 				TreeNode *right = new TreeNode();
-				Process *extra = keys[1];
-				left->addKey(keys[0]);
-				right->addKey(keys[2]);
+				Process *extra = new Process(*keys[1]);
+				left->addKey(new Process(*keys[0]));
+				right->addKey(new Process(*keys[2]));
 				left->setSon(0, sons[0]);
 				left->setSon(1, sons[1]);
 				right->setSon(0, sons[2]);
 				right->setSon(1, sons[3]);
 				if (curr != root) {
 					auto parentKeys = prev->getKeys();
-					left->setParent(prev);
-					right->setParent(prev);
 					prev->addKey(extra);
 					int pos = prev->find(extra);
 					int disp = std::count_if(parentKeys.begin(), parentKeys.end(), [](Process *ptr) { return ptr != nullptr; }) - pos - 1;
@@ -83,8 +101,6 @@ void TwoThreeFour::addKey(Process* p) {
 					newRoot->addKey(extra);
 					newRoot->setSon(0, left);
 					newRoot->setSon(1, right);
-					left->setParent(newRoot);
-					right->setParent(newRoot);
 					root = newRoot;
 					prevDel = curr;
 					curr = newRoot;

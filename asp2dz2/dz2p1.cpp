@@ -1,6 +1,5 @@
 #include <iostream>
 #include "process.h"
-#include "treenode.h"
 #include "twothreefour.h"
 #include <string>
 
@@ -12,6 +11,7 @@ int main(void) {
 	for (int i = 0; i < 26; i++) {
 		tree->addKey(new Process(names[i], i * 10, i * 10));
 	}
+	delete tree;
 
 	return 0;
 }

@@ -1,5 +1,4 @@
 #include "treenode.h"
-#include <algorithm>
 #include <array>
 
 void TreeNode::copy(const TreeNode& tn) {
@@ -23,12 +22,11 @@ void TreeNode::move(TreeNode& tn) {
 }
 
 TreeNode::TreeNode() {
-	parent = nullptr;
-	for (auto i = 0; i < keys.size(); i++) {
-		keys[i] = nullptr;
+	for (auto &key : keys) {
+		key = nullptr;
 	}
-	for (auto i = 0; i < sons.size(); i++) {
-		sons[i] = nullptr;
+	for (auto &son : sons) {
+		son = nullptr;
 	}
 }
 
@@ -56,7 +54,7 @@ TreeNode& TreeNode::operator=(TreeNode &&tn) {
 
 TreeNode::~TreeNode() {
 	for (auto &key : keys) {
-		key = nullptr;
+		delete key;
 	}
 	for (auto &son : sons) {
 		son = nullptr;
@@ -81,20 +79,12 @@ const Process* TreeNode::findKeyExec(const long time) const {
 	return nullptr;
 }
 
-TreeNode* TreeNode::getParent() const {
-	return parent;
-}
-
 std::array<Process*, 3> TreeNode::getKeys() const {
 	return keys;
 }
 
 std::array<TreeNode*, 4> TreeNode::getSons() const {
 	return sons;
-}
-
-void TreeNode::setParent(TreeNode *parent) {
-	this->parent = parent;
 }
 
 void TreeNode::addKey(Process* key) {
