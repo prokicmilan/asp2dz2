@@ -11,11 +11,7 @@ int main(void) {
 	for (int i = 0; i < 26; i++) {
 		tree->addKey(new Process(names[i], i * 10, i * 10));
 	}
-	Process *tst = new Process("test", 200, 600);
-	tst->updateExecutionTime(2000);
-	tree->addKey(tst);
-	const Process *tstFound = tree->findKeyExec(2000);
-	std::cout << *tstFound << std::endl;
+	std::cout << *tree;
 	delete tree;
 
 	return 0;

@@ -129,6 +129,40 @@ void TwoThreeFour::addKey(Process* p) {
 	}
 }
 
+std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
+	int level = 1;
+	int cnt = 0;
+	int cntNext = 0;
+	std::vector<TreeNode*> next;
+	TreeNode *curr = nullptr;
 
+	if (t.root != nullptr) {
+		next.insert(next.begin(), t.root);
+		cntNext = 1;
+		while (!next.empty()) {
+			cnt = cntNext;
+			cntNext = 0;
+			os << "Nivo: " << level++ << ":" << std::endl;
+			for (int i = 0; i < cnt; i++) {
+				curr = next.back();
+				next.erase(next.end() - 1);
+				auto keys = curr->getKeys();
+				for (auto key : keys) {
+					if (key != nullptr) {
+						os << *key << std::endl;
+					}
+				}
+				auto sons = curr->getSons();
+				for (auto son : sons) {
+					if (son != nullptr) {
+						next.insert(next.begin(), son);
+						cntNext++;
+					}
+				}
+			}
+		}
+	}
+	return os;
+}
 
 
