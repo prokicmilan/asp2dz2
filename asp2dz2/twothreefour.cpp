@@ -11,19 +11,21 @@ TwoThreeFour::~TwoThreeFour() {
 	TreeNode *curr = nullptr;
 	std::vector<TreeNode*> next;
 
-	next.insert(next.begin(), root);
-	while (!next.empty()) {
-		curr = next.back();
-		next.pop_back();
-		auto sons = curr->getSons();
-		for (auto son : sons) {
-			if (son != nullptr) {
-				next.insert(next.begin(), son);
+	if (root != nullptr) {
+		next.insert(next.begin(), root);
+		while (!next.empty()) {
+			curr = next.back();
+			next.pop_back();
+			auto sons = curr->getSons();
+			for (auto son : sons) {
+				if (son != nullptr) {
+					next.insert(next.begin(), son);
+				}
 			}
+			delete curr;
 		}
-		delete curr;
+		root = nullptr;
 	}
-	root = nullptr;
 }
 
 
@@ -42,21 +44,31 @@ const Process* TwoThreeFour::findKeyWait(const long time) const {
 	}
 }
 
-//ovo ne radi ovako, kljucevi su sortirani iskljucivo po vremenu cekanja,
-//da bi se vrsila pretraga prema vremenu izvrsavanja, mora da se prodje kroz celo stablo
+
 const Process* TwoThreeFour::findKeyExec(const long time) const {
 	TreeNode *curr = nullptr;
+	std::vector<TreeNode*> next;
 
-	curr = root;
-	while (curr != nullptr && curr->findKeyExec(time) == nullptr) {
-		curr = curr->getNextExec(time);
+	if (root != nullptr) {
+		next.insert(next.begin(), root);
+		while (!next.empty()) {
+			curr = next.front();
+			const Process *proc = curr->findKeyExec(time);
+			if (proc != nullptr) {
+				return proc;
+			}
+			else {
+				auto sons = curr->getSons();
+				next.erase(next.begin());
+				for (auto son : sons) {
+					if (son != nullptr) {
+						next.insert(next.begin(), son);
+					}
+				}
+			}
+		}
 	}
-	if (curr != nullptr) {
-		return curr->findKeyExec(time);
-	}
-	else {
-		return nullptr;
-	}
+	return nullptr;
 }
 
 void TwoThreeFour::addKey(Process* p) {

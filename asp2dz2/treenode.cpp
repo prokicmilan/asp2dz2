@@ -63,7 +63,7 @@ TreeNode::~TreeNode() {
 
 const Process* TreeNode::findKeyWait(const long time) const {
 	for (auto key : keys) {
-		if (key->getWaitingTime() == time) {
+		if (key != nullptr && key->getWaitingTime() == time) {
 			return key;
 		}
 	}
@@ -72,7 +72,7 @@ const Process* TreeNode::findKeyWait(const long time) const {
 
 const Process* TreeNode::findKeyExec(const long time) const {
 	for (auto key : keys) {
-		if (key->getExecutionTime() == time) {
+		if (key != nullptr && key->getExecutionTime() == time) {
 			return key;
 		}
 	}
@@ -89,7 +89,6 @@ std::array<TreeNode*, 4> TreeNode::getSons() const {
 
 void TreeNode::addKey(Process* key) {
 	keys[2] = key;
-	//std::sort(keys.begin(), keys.end(), [](Process *ptrA, Process *ptrB) { if (ptrA != nullptr && ptrB != nullptr) return ptrA->getWaitingTime() <= ptrB->getWaitingTime(); else return false; });
 	for (int i = 0; i < keys.size() - 1; i++) {
 		for (int j = i + 1; j < keys.size(); j++) {
 			if (keys[i] == nullptr) {
@@ -121,23 +120,6 @@ TreeNode* TreeNode::getNextWait(const long time) const {
 		}
 	}
 	return sons[sons.size() - 1];
-}
-
-TreeNode* TreeNode::getNextExec(const long time) const {
-	if (time < keys[0]->getExecutionTime()) {
-		return sons[0];
-	}
-	for (int i = 0; i < keys.size() - 1; i++) {
-		if (keys[i + 1] != nullptr) {
-			if (keys[i]->getExecutionTime() < time && keys[i + 1]->getExecutionTime() > time) {
-				return sons[i + 1];
-			}
-		}
-		else {
-			return sons[i + 1];
-		}
-	}
-	return sons[sons.size()];
 }
 
 void TreeNode::moveSons(const int disp) {
