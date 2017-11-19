@@ -100,7 +100,7 @@ TreeNode* TreeNode::getNextWait(const long time) const {
 	}
 	for (auto i = 0; i < keys.size() - 1; i++) {
 		if (keys[i + 1] != nullptr) {
-			if (keys[i]->getWaitingTime() < time && keys[i + 1]->getWaitingTime() > time) {
+			if (keys[i]->getWaitingTime() <= time && keys[i + 1]->getWaitingTime() > time) {
 				//ako je trazeni kljuc izmedju dva kljuca, vraca se pokazivac na cvor izmedju njih
 				return sons[i + 1];
 			}

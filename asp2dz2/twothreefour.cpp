@@ -3,6 +3,148 @@
 #include "twothreefour.h"
 #include <vector>
 
+void TwoThreeFour::borrowRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBrother) {
+	int pos;
+	auto parentKeys = prev->getKeys();
+	auto brotherKeys = rightBrother->getKeys();
+
+	for (pos = parentKeys.size() - 1; pos > 0; pos--) {
+		if (parentKeys[pos] != nullptr) {
+			break;
+		}
+	}
+	curr->addKey(new Process(*parentKeys[pos]));
+	prev->removeKey(pos);
+	prev->addKey(new Process(*brotherKeys[0]));
+	rightBrother->removeKey(0);
+	//TODO: prevezi pokazivace
+	curr->setSon(2, rightBrother->getSons()[0]);
+	rightBrother->removeSon(0);
+}
+
+void TwoThreeFour::borrowLeft(TreeNode* prev, TreeNode* curr, TreeNode* leftBrother) {
+	int pos;
+	auto parentKeys = prev->getKeys();
+	auto brotherKeys = leftBrother->getKeys();
+
+	curr->addKey(new Process(*parentKeys[0]));
+	prev->removeKey(0);
+	for (pos = brotherKeys.size() - 1; pos > 0; pos--) {
+		if (brotherKeys[pos] != nullptr) {
+			break;
+		}
+	}
+	prev->addKey(new Process(*brotherKeys[pos]));
+	leftBrother->removeKey(pos);
+	//TODO: prevezi pokazivace
+	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
+	curr->moveSons(1);
+	curr->setSon(0, leftBrother->getSons()[pos + 1]);
+	leftBrother->removeSon(pos + 1);
+}
+
+void TwoThreeFour::mergeRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBrother) {
+	int pos;
+	auto parentKeys = prev->getKeys();
+	auto brotherKeys = rightBrother->getKeys();
+
+	curr->addKey(new Process(*brotherKeys[0]));
+	rightBrother->removeKey(0);
+	for (pos = parentKeys.size() - 1; pos > 0; pos--) {
+		if (parentKeys[pos] != nullptr && parentKeys[pos]->getWaitingTime() <= brotherKeys[0]->getWaitingTime()) {
+			break;
+		}
+	}
+	curr->addKey(new Process(*parentKeys[pos]));
+	prev->removeKey(pos);
+	//TODO: prevezi pokazivace i obrisi desnog brata
+	curr->setSon(2, rightBrother->getSons()[0]);
+	curr->setSon(3, rightBrother->getSons()[1]);
+	prev->removeSon(pos + 1);
+	delete rightBrother;
+}
+
+void TwoThreeFour::mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBrother) {
+	int pos;
+	auto parentKeys = prev->getKeys();
+	auto brotherKeys = leftBrother->getKeys();
+
+	curr->addKey(new Process(*brotherKeys[0]));
+	leftBrother->removeKey(0);
+	for (pos = 0; pos < parentKeys.size(); pos++) {
+		if (parentKeys[pos]->getWaitingTime() >= brotherKeys[0]->getWaitingTime()) {
+			break;
+		}
+	}
+	curr->addKey(new Process(*parentKeys[pos]));
+	prev->removeKey(pos);
+	//TODO: prevezi pokazivace i obrisi levog brata
+	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
+	curr->moveSons(1);
+	curr->moveSons(1);
+	curr->setSon(0, leftBrother->getSons()[0]);
+	curr->setSon(1, leftBrother->getSons()[1]);
+	prev->removeSon(pos);
+	delete leftBrother;
+}
+
+void TwoThreeFour::fixupNode(TreeNode *prev, TreeNode *curr) {
+	TreeNode *rightBrother = curr->getBrother(prev, false);
+	TreeNode *leftBrother = curr->getBrother(prev, true);
+	auto parentKeys = prev->getKeys();
+	bool right = false;
+	bool left = false;
+
+	//da li desni brat postoji i ima za pozajmicu
+	if (rightBrother != nullptr) {
+		auto brotherKeys = rightBrother->getKeys();
+		int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
+		if (brotherCnt > 1) {
+			right = true;
+		}
+	}
+	//da li levi brat postoji i ima za pozajmicu
+	if (leftBrother != nullptr) {
+		auto brotherKeys = leftBrother->getKeys();
+		int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
+		if (brotherCnt > 1) {
+			left = true;
+		}
+	}
+	//desni postoji i ima za pozajmicu
+	if (right) {
+		borrowRight(prev, curr, rightBrother);
+	}
+	//desni ne postoji ili nema za pozajmicu
+	else {
+		//levi postoji i ima za pozajmicu
+		if (left) {
+			borrowLeft(prev, curr, leftBrother);
+		}
+		//ni levi ni desni nemaju za pozajmicu
+		else {
+			//desni postoji, spajaju se trenutni, desni i kljuc iz oca
+			if (rightBrother != nullptr) {
+				mergeRight(prev, curr, rightBrother);
+			}
+			//levi postoji, spajaju se trenutni, levi i kljuc iz oca
+			else {
+				mergeLeft(prev, curr, leftBrother);
+			}
+			//posto je jedan cvor uzet od oca, proveriti da li je otac koren
+			//ako jeste, proveriti da li je ovom pozajmicom potpuno ispraznjen
+			//ako je ispraznjen, brise se i novi koren postaje tekuci cvor
+			if (prev == root) {
+				if (std::count_if(parentKeys.begin(), parentKeys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
+					delete root;
+					root = curr;
+				}
+			}
+		}
+	}
+}
+
+
 TwoThreeFour::TwoThreeFour() {
 	root = nullptr;
 }
@@ -43,7 +185,6 @@ const Process* TwoThreeFour::findKeyWait(const long time) const {
 		return nullptr;
 	}
 }
-
 
 const Process* TwoThreeFour::findKeyExec(const long time) const {
 	TreeNode *curr = nullptr;
@@ -135,142 +276,66 @@ void TwoThreeFour::delKey(Process* p) {
 
 	if (root != nullptr) {
 		curr = root;
-		while (curr != nullptr && curr->find(p) != -1) {
+		while (curr != nullptr && curr->find(p) == -1) {
 			auto keys = curr->getKeys();
-			auto sons = curr->getSons();
 			if (curr != root) {
 				int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) {return ptr != nullptr; });
 				if (cnt == 1) {
-					TreeNode *rightBrother = curr->getBrother(prev, false);
-					TreeNode *leftBrother = curr->getBrother(prev, true);
-					auto parentKeys = prev->getKeys();
-					bool right = false;
-					bool left = false;
-					bool borrowed = false;
-					//da li desni brat postoji i ima za pozajmicu
-					if (rightBrother != nullptr) {
-						auto brotherKeys = rightBrother->getKeys();
-						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
-						if (brotherCnt > 1) {
-							right = true;
-						}
-					}
-					//da li desni brat postoji i ima za pozajmicu
-					if (leftBrother != nullptr) {
-						auto brotherKeys = leftBrother->getKeys();
-						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
-						if (brotherCnt > 1) {
-							left = true;
-						}
-					}
-					//desni postoji i ima za pozajmicu
-					if (right) {
-						int pos;
-						for (pos = parentKeys.size() - 1; pos > 0; pos--) {
-							if (parentKeys[pos] != nullptr) {
-								break;
-							}
-						}
-						curr->addKey(new Process(*parentKeys[pos]));
-						prev->removeKey(pos);
-						prev->addKey(new Process(*const_cast<Process*>(rightBrother->getKeys()[0])));
-						rightBrother->removeKey(0);
-						//TODO: prevezi pokazivace
-						curr->setSon(2, rightBrother->getSons()[0]);
-						rightBrother->removeSon(0);
-					}
-					//desni ne postoji ili nema za pozajmicu
-					else {
-						//levi postoji i ima za pozajmicu
-						if (left) {
-							curr->addKey(new Process(*parentKeys[0]));
-							prev->removeKey(0);
-							auto brotherKeys = leftBrother->getKeys();
-							int pos;
-							for (pos = brotherKeys.size() - 1; pos > 0; pos--) {
-								if (brotherKeys[pos] != nullptr) {
-									break;
-								}
-							}
-							prev->addKey(new Process(*brotherKeys[pos]));
-							leftBrother->removeKey(pos);
-							//TODO: prevezi pokazivace
-							//ovde moze da se pojavi problem, proveri funkciju za pomeranje
-							curr->moveSons(1);
-							curr->setSon(0, leftBrother->getSons()[pos + 1]);
-							leftBrother->removeSon(pos + 1);
-						}
-						//ni levi ni desni nemaju za pozajmicu
-						else {
-							//desni postoji, spajaju se trenutni, desni i kljuc iz oca
-							if (rightBrother != nullptr) {
-								curr->addKey(new Process(*const_cast<Process*>(rightBrother->getKeys()[0])));
-								rightBrother->removeKey(0);
-								int pos;
-								for (pos = parentKeys.size() - 1; pos > 0; pos--) {
-									if (parentKeys[pos] != nullptr && parentKeys[pos]->getWaitingTime() <= rightBrother->getKeys()[0]->getWaitingTime()) {
-										break;
-									}
-								}
-								curr->addKey(new Process(*parentKeys[pos]));
-								prev->removeKey(pos);
-								//TODO: prevezi pokazivace i obrisi desnog brata
-								curr->setSon(2, rightBrother->getSons()[0]);
-								curr->setSon(3, rightBrother->getSons()[1]);
-								prev->removeSon(pos + 1);
-								delete rightBrother;
-							}
-							//levi postoji, spajaju se trenutni, levi i kljuc iz oca
-							else {
-								curr->addKey(new Process(*const_cast<Process*>(leftBrother->getKeys()[0])));
-								leftBrother->removeKey(0);
-								int pos;
-								for (pos = 0; pos < parentKeys.size(); pos++) {
-									if (parentKeys[pos]->getWaitingTime() >= leftBrother->getKeys()[0]->getWaitingTime()) {
-										break;
-									}
-								}
-								curr->addKey(new Process(*parentKeys[pos]));
-								prev->removeKey(pos);
-								//TODO: prevezi pokazivace i obrisi levog brata
-								//ovde moze da se pojavi problem, proveri funkciju za pomeranje
-								curr->moveSons(1);
-								curr->moveSons(1);
-								curr->setSon(0, leftBrother->getSons()[0]);
-								curr->setSon(1, leftBrother->getSons()[1]);
-								prev->removeSon(pos);
-								delete leftBrother;
-							}
-							//posto je jedan cvor uzet od oca, proveriti da li je otac koren
-							//ako jeste, proveriti da li je ovom pozajmicom potpuno ispraznjen
-							//ako je ispraznjen, brise se i novi koren postaje tekuci cvor
-							if (prev == root) {
-								if (std::count_if(parentKeys.begin(), parentKeys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
-									delete root;
-									root = curr;
-								}
-							}
-						}
-					}
+					fixupNode(prev, curr);
 				}
 			}
 			prev = curr;
 			curr = curr->getNextWait(p->getWaitingTime());
 		}
-		if (curr == nullptr) {
-			return;
-		}
-		else {
-			//proveriti da li je list
-			//ako nije list, zameniti sa inorder sledbenikom (jednom desno, levo do kraja)
-			//prilikom silazenja nastaviti sa spajanjem kriticnih cvorova
-			//kada se dodje do lista:
-			//ako ima 2 ili vise kljuceva, samo se obrise trazeni
-			//ako ima samo jedan kljuc, ista procedura kao sa svim kriticnim
+		if (curr != nullptr) {
+			//ako je list
+			if (curr->getSons()[0] == nullptr) {
+				auto keys = curr->getKeys();
+				int pos;
+				for (pos = 0; pos < keys.size(); pos++) {
+					if (keys[pos] == p) {
+						break;
+					}
+				}
+				curr->removeKey(pos);
+			}
+			//nije list, spustamo se do inorder sledbenika i spajamo cvorove
+			else {
+				TreeNode *found = curr;
+				TreeNode *parent = nullptr;
+				int pos;
+				auto keys = curr->getKeys();
+
+				prev = curr;
+				for (pos = 0; pos < keys.size(); pos++) {
+					if (keys[pos]->getWaitingTime() == p->getWaitingTime()) {
+						break;
+					}
+				}
+				curr = curr->getSons()[pos + 1];
+				while (curr != nullptr) {
+					int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) {return ptr != nullptr; });
+					if (cnt == 1) {
+						fixupNode(prev, curr);
+					}
+					parent = prev;
+					prev = curr;
+					curr = curr->getSons()[0];
+				}
+				curr = prev;
+				auto leafKeys = curr->getKeys();
+				found->addKey(new Process(*leafKeys[0]));
+				found->removeKey(pos);
+				curr->removeKey(0);
+				int cnt = std::count_if(leafKeys.begin(), leafKeys.end(), [](Process *ptr) { return ptr != nullptr; });
+				//ako je uklonjen poslednji kljuc
+				if (cnt == 0) {
+					fixupNode(curr, parent);
+				}
+			}
 		}
 	}
 }
-
 
 std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 	int level = 1;

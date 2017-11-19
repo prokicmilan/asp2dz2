@@ -13,4 +13,10 @@ public:
 	friend std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t);
 private:
 	TreeNode *root;
+
+	void borrowRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBrother);
+	void borrowLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBrother);
+	void mergeRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBrother);
+	void mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBrother);
+	void fixupNode(TreeNode *prev, TreeNode *curr);
 };
