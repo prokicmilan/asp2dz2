@@ -314,7 +314,8 @@ void TwoThreeFour::delKey(Process* p) {
 				}
 				curr = curr->getSons()[pos + 1];
 				while (curr != nullptr) {
-					int cnt = std::count_if(keys.begin(), keys.end(), [](Process *ptr) {return ptr != nullptr; });
+					auto currKeys = curr->getKeys();
+					int cnt = std::count_if(currKeys.begin(), currKeys.end(), [](Process *ptr) {return ptr != nullptr; });
 					if (cnt == 1) {
 						fixupNode(prev, curr);
 					}

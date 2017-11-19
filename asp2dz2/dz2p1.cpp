@@ -25,7 +25,8 @@ int main(void) {
 
 	}
 	std::cout << *tree;
-	std::cout << "Deleting I" << std::endl;
+	std::cout << "Deleting" << std::endl;
+	tst = const_cast<Process *>(tree->findKeyWait(50));
 	tree->delKey(tst);
 	std::cout << *tree;
 	delete tree;
