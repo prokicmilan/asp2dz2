@@ -15,20 +15,19 @@ public:
 	const Process* findKeyWait(const long time) const;
 	const Process* findKeyExec(const long time) const;
 	TreeNode* getNextWait(const long time) const;
-	TreeNode* getNextExec(const long time) const;
 	std::array<Process*, 3> getKeys() const;
 	std::array<TreeNode*, 4> getSons() const;
 	void addKey(Process *key);
 	void moveSons(const int disp);
 	void setSon(const int pos, TreeNode *node);
 	void removeKey(int pos);
-	void removeNode(TreeNode *node);
+	void removeSon(int pos);
 	TreeNode* getBrother(TreeNode *parent, bool left);
-	void swap(Process **p1, Process **p2) {
+	/*void swap(Process **p1, Process **p2) {
 		Process *tmp = *p1;
 		*p1 = *p2;
 		*p2 = tmp;
-	}
+	}*/
 	int find(Process *p) {
 		for (int i = 0; i < keys.size(); i++) {
 			if (keys[i] != nullptr && keys[i] == p) {

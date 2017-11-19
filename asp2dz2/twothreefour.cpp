@@ -143,9 +143,11 @@ void TwoThreeFour::delKey(Process* p) {
 				if (cnt == 1) {
 					TreeNode *rightBrother = curr->getBrother(prev, false);
 					TreeNode *leftBrother = curr->getBrother(prev, true);
+					auto parentKeys = prev->getKeys();
 					bool right = false;
 					bool left = false;
 					bool borrowed = false;
+					//da li desni brat postoji i ima za pozajmicu
 					if (rightBrother != nullptr) {
 						auto brotherKeys = rightBrother->getKeys();
 						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
@@ -153,6 +155,7 @@ void TwoThreeFour::delKey(Process* p) {
 							right = true;
 						}
 					}
+					//da li desni brat postoji i ima za pozajmicu
 					if (leftBrother != nullptr) {
 						auto brotherKeys = leftBrother->getKeys();
 						int brotherCnt = std::count_if(brotherKeys.begin(), brotherKeys.end(), [](Process *ptr) { return ptr != nullptr; });
@@ -160,8 +163,8 @@ void TwoThreeFour::delKey(Process* p) {
 							left = true;
 						}
 					}
+					//desni postoji i ima za pozajmicu
 					if (right) {
-						auto parentKeys = prev->getKeys();
 						int pos;
 						for (pos = parentKeys.size() - 1; pos > 0; pos--) {
 							if (parentKeys[pos] != nullptr) {
@@ -172,11 +175,15 @@ void TwoThreeFour::delKey(Process* p) {
 						prev->removeKey(pos);
 						prev->addKey(new Process(*const_cast<Process*>(rightBrother->getKeys()[0])));
 						rightBrother->removeKey(0);
-						//prevezi pokazivace
+						//TODO: prevezi pokazivace
+						curr->setSon(2, rightBrother->getSons()[0]);
+						rightBrother->removeSon(0);
 					}
+					//desni ne postoji ili nema za pozajmicu
 					else {
+						//levi postoji i ima za pozajmicu
 						if (left) {
-							curr->addKey(new Process(*const_cast<Process*>(prev->getKeys()[0])));
+							curr->addKey(new Process(*parentKeys[0]));
 							prev->removeKey(0);
 							auto brotherKeys = leftBrother->getKeys();
 							int pos;
@@ -187,7 +194,62 @@ void TwoThreeFour::delKey(Process* p) {
 							}
 							prev->addKey(new Process(*brotherKeys[pos]));
 							leftBrother->removeKey(pos);
-							//prevezi pokazivace
+							//TODO: prevezi pokazivace
+							//ovde moze da se pojavi problem, proveri funkciju za pomeranje
+							curr->moveSons(1);
+							curr->setSon(0, leftBrother->getSons()[pos + 1]);
+							leftBrother->removeSon(pos + 1);
+						}
+						//ni levi ni desni nemaju za pozajmicu
+						else {
+							//desni postoji, spajaju se trenutni, desni i kljuc iz oca
+							if (rightBrother != nullptr) {
+								curr->addKey(new Process(*const_cast<Process*>(rightBrother->getKeys()[0])));
+								rightBrother->removeKey(0);
+								int pos;
+								for (pos = parentKeys.size() - 1; pos > 0; pos--) {
+									if (parentKeys[pos] != nullptr && parentKeys[pos]->getWaitingTime() <= rightBrother->getKeys()[0]->getWaitingTime()) {
+										break;
+									}
+								}
+								curr->addKey(new Process(*parentKeys[pos]));
+								prev->removeKey(pos);
+								//TODO: prevezi pokazivace i obrisi desnog brata
+								curr->setSon(2, rightBrother->getSons()[0]);
+								curr->setSon(3, rightBrother->getSons()[1]);
+								prev->removeSon(pos + 1);
+								delete rightBrother;
+							}
+							//levi postoji, spajaju se trenutni, levi i kljuc iz oca
+							else {
+								curr->addKey(new Process(*const_cast<Process*>(leftBrother->getKeys()[0])));
+								leftBrother->removeKey(0);
+								int pos;
+								for (pos = 0; pos < parentKeys.size(); pos++) {
+									if (parentKeys[pos]->getWaitingTime() >= leftBrother->getKeys()[0]->getWaitingTime()) {
+										break;
+									}
+								}
+								curr->addKey(new Process(*parentKeys[pos]));
+								prev->removeKey(pos);
+								//TODO: prevezi pokazivace i obrisi levog brata
+								//ovde moze da se pojavi problem, proveri funkciju za pomeranje
+								curr->moveSons(1);
+								curr->moveSons(1);
+								curr->setSon(0, leftBrother->getSons()[0]);
+								curr->setSon(1, leftBrother->getSons()[1]);
+								prev->removeSon(pos);
+								delete leftBrother;
+							}
+							//posto je jedan cvor uzet od oca, proveriti da li je otac koren
+							//ako jeste, proveriti da li je ovom pozajmicom potpuno ispraznjen
+							//ako je ispraznjen, brise se i novi koren postaje tekuci cvor
+							if (prev == root) {
+								if (std::count_if(parentKeys.begin(), parentKeys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
+									delete root;
+									root = curr;
+								}
+							}
 						}
 					}
 				}
@@ -199,7 +261,12 @@ void TwoThreeFour::delKey(Process* p) {
 			return;
 		}
 		else {
-			
+			//proveriti da li je list
+			//ako nije list, zameniti sa inorder sledbenikom (jednom desno, levo do kraja)
+			//prilikom silazenja nastaviti sa spajanjem kriticnih cvorova
+			//kada se dodje do lista:
+			//ako ima 2 ili vise kljuceva, samo se obrise trazeni
+			//ako ima samo jedan kljuc, ista procedura kao sa svim kriticnim
 		}
 	}
 }

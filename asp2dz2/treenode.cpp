@@ -115,9 +115,9 @@ TreeNode* TreeNode::getNextWait(const long time) const {
 
 void TreeNode::moveSons(const int disp) {
 	int d = disp;
-
-	if (disp == 1 && sons.size() == 2 || disp == 2 && sons.size() == 3) {
-		while (disp >= 0) {
+	int cnt = std::count_if(sons.begin(), sons.end(), [](TreeNode *ptr) { return ptr != nullptr; });
+	if (disp == 1 && cnt == 2 || disp == 2 && cnt == 3) {
+		while (d >= 0) {
 			sons[d + 1] = sons[d];
 			d--;
 		}
@@ -139,6 +139,12 @@ void TreeNode::removeKey(int pos) {
 	delete keys[pos];
 	keys[pos] = nullptr;
 	sort();
+}
+
+void TreeNode::removeSon(int pos) {
+	for (int i = pos; i < sons.size() - 1; i++) {
+		sons[i] = sons[i + 1];
+	}
 }
 
 
