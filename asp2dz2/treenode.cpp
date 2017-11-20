@@ -2,10 +2,10 @@
 #include <array>
 
 void TreeNode::copy(const TreeNode& tn) {
-	for (int i = 0; i < keys.size(); i++) {
+	for (unsigned int i = 0; i < keys.size(); i++) {
 		keys[i] = tn.keys[i];
 	}
-	for (int i = 0; i < sons.size(); i++) {
+	for (unsigned int i = 0; i < sons.size(); i++) {
 		sons[i] = tn.sons[i];
 	}
 }
@@ -98,7 +98,7 @@ TreeNode* TreeNode::getNextWait(const long time) const {
 	if (time < keys[0]->getWaitingTime()) {
 		return sons[0];
 	}
-	for (auto i = 0; i < keys.size() - 1; i++) {
+	for (unsigned int i = 0; i < keys.size() - 1; i++) {
 		if (keys[i + 1] != nullptr) {
 			if (keys[i]->getWaitingTime() <= time && keys[i + 1]->getWaitingTime() > time) {
 				//ako je trazeni kljuc izmedju dva kljuca, vraca se pokazivac na cvor izmedju njih
@@ -136,13 +136,26 @@ void TreeNode::setSon(const int pos, TreeNode* node) {
 }
 
 void TreeNode::removeKey(int pos) {
+	//delete keys[pos];
+	keys[pos] = nullptr;
+	sort();
+}
+
+void TreeNode::emptyNode() {
+	for (auto &key : keys) {
+		key = nullptr;
+	}
+}
+
+void TreeNode::deleteKey(int pos) {
 	delete keys[pos];
 	keys[pos] = nullptr;
 	sort();
 }
 
+
 void TreeNode::removeSon(int pos) {
-	for (int i = pos; i < sons.size() - 1; i++) {
+	for (unsigned int i = pos; i < sons.size() - 1; i++) {
 		sons[i] = sons[i + 1];
 	}
 }
@@ -150,7 +163,7 @@ void TreeNode::removeSon(int pos) {
 
 TreeNode* TreeNode::getBrother(TreeNode *parent, bool left) {
 	auto parentSons = parent->getSons();
-	for (int i = 0; i < parentSons.size(); i++) {
+	for (unsigned int i = 0; i < parentSons.size(); i++) {
 		if (parentSons[i] == this) {
 			if (left) {
 				if (i > 0) {
@@ -170,6 +183,17 @@ TreeNode* TreeNode::getBrother(TreeNode *parent, bool left) {
 			}
 		}
 	}
+	return nullptr;
 }
+
+int TreeNode::find(Process* p) {
+	for (unsigned int i = 0; i < keys.size(); i++) {
+		if (keys[i] != nullptr && keys[i] == p) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 
 

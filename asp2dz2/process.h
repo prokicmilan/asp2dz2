@@ -13,6 +13,7 @@ public:
 	long getMaxWaitingTime() const;
 	long getWaitingTime() const;
 	long getExecutionTime() const;
+	int getPid() const;
 
 	//setters
 	void setWaitingTime(const long time);
@@ -25,6 +26,8 @@ public:
 	friend std::ostream& operator<<(std::ostream &os, const Process &p);
 
 private:
+	int pid;
+	static int prevID;
 	std::string name;
 	long timeToComplete;
 	long maxWaitingTime;

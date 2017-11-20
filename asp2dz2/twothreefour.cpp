@@ -13,9 +13,9 @@ void TwoThreeFour::borrowRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBr
 			break;
 		}
 	}
-	curr->addKey(new Process(*parentKeys[pos]));
+	curr->addKey(parentKeys[pos]);
 	prev->removeKey(pos);
-	prev->addKey(new Process(*brotherKeys[0]));
+	prev->addKey(brotherKeys[0]);
 	rightBrother->removeKey(0);
 	//TODO: prevezi pokazivace
 	curr->setSon(2, rightBrother->getSons()[0]);
@@ -27,14 +27,14 @@ void TwoThreeFour::borrowLeft(TreeNode* prev, TreeNode* curr, TreeNode* leftBrot
 	auto parentKeys = prev->getKeys();
 	auto brotherKeys = leftBrother->getKeys();
 
-	curr->addKey(new Process(*parentKeys[0]));
+	curr->addKey(parentKeys[0]);
 	prev->removeKey(0);
 	for (pos = brotherKeys.size() - 1; pos > 0; pos--) {
 		if (brotherKeys[pos] != nullptr) {
 			break;
 		}
 	}
-	prev->addKey(new Process(*brotherKeys[pos]));
+	prev->addKey(brotherKeys[pos]);
 	leftBrother->removeKey(pos);
 	//TODO: prevezi pokazivace
 	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
@@ -48,14 +48,14 @@ void TwoThreeFour::mergeRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBro
 	auto parentKeys = prev->getKeys();
 	auto brotherKeys = rightBrother->getKeys();
 
-	curr->addKey(new Process(*brotherKeys[0]));
+	curr->addKey(brotherKeys[0]);
 	rightBrother->removeKey(0);
 	for (pos = parentKeys.size() - 1; pos > 0; pos--) {
 		if (parentKeys[pos] != nullptr && parentKeys[pos]->getWaitingTime() <= brotherKeys[0]->getWaitingTime()) {
 			break;
 		}
 	}
-	curr->addKey(new Process(*parentKeys[pos]));
+	curr->addKey(parentKeys[pos]);
 	prev->removeKey(pos);
 	//TODO: prevezi pokazivace i obrisi desnog brata
 	curr->setSon(2, rightBrother->getSons()[0]);
@@ -69,14 +69,14 @@ void TwoThreeFour::mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBroth
 	auto parentKeys = prev->getKeys();
 	auto brotherKeys = leftBrother->getKeys();
 
-	curr->addKey(new Process(*brotherKeys[0]));
+	curr->addKey(brotherKeys[0]);
 	leftBrother->removeKey(0);
 	for (pos = 0; pos < parentKeys.size(); pos++) {
 		if (parentKeys[pos]->getWaitingTime() >= brotherKeys[0]->getWaitingTime()) {
 			break;
 		}
 	}
-	curr->addKey(new Process(*parentKeys[pos]));
+	curr->addKey(parentKeys[pos]);
 	prev->removeKey(pos);
 	//TODO: prevezi pokazivace i obrisi levog brata
 	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
@@ -144,7 +144,6 @@ void TwoThreeFour::fixupNode(TreeNode *prev, TreeNode *curr) {
 	}
 }
 
-
 TwoThreeFour::TwoThreeFour() {
 	root = nullptr;
 }
@@ -169,7 +168,6 @@ TwoThreeFour::~TwoThreeFour() {
 		root = nullptr;
 	}
 }
-
 
 const Process* TwoThreeFour::findKeyWait(const long time) const {
 	TreeNode *curr = nullptr;
@@ -230,9 +228,10 @@ void TwoThreeFour::addKey(Process* p) {
 			if (cnt == 3) {
 				TreeNode *left = new TreeNode();
 				TreeNode *right = new TreeNode();
-				Process *extra = new Process(*keys[1]);
-				left->addKey(new Process(*keys[0]));
-				right->addKey(new Process(*keys[2]));
+				Process *extra = keys[1];
+				left->addKey(keys[0]);
+				right->addKey(keys[2]);
+				curr->emptyNode();
 				left->setSon(0, sons[0]);
 				left->setSon(1, sons[1]);
 				right->setSon(0, sons[2]);
@@ -291,27 +290,24 @@ void TwoThreeFour::delKey(Process* p) {
 			//ako je list
 			if (curr->getSons()[0] == nullptr) {
 				auto keys = curr->getKeys();
-				int pos;
-				for (pos = 0; pos < keys.size(); pos++) {
+				int pos = curr->find(p);
+				/*for (pos = 0; pos < keys.size(); pos++) {
 					if (keys[pos] == p) {
 						break;
 					}
-				}
-				curr->removeKey(pos);
+				}*/
+				curr->deleteKey(pos);
+				p = nullptr;
+				fixupNode(prev, curr);
 			}
 			//nije list, spustamo se do inorder sledbenika i spajamo cvorove
 			else {
 				TreeNode *found = curr;
 				TreeNode *parent = nullptr;
-				int pos;
+				int pos = curr->find(p);
 				auto keys = curr->getKeys();
 
 				prev = curr;
-				for (pos = 0; pos < keys.size(); pos++) {
-					if (keys[pos]->getWaitingTime() == p->getWaitingTime()) {
-						break;
-					}
-				}
 				curr = curr->getSons()[pos + 1];
 				while (curr != nullptr) {
 					auto currKeys = curr->getKeys();
@@ -325,8 +321,9 @@ void TwoThreeFour::delKey(Process* p) {
 				}
 				curr = prev;
 				auto leafKeys = curr->getKeys();
-				found->addKey(new Process(*leafKeys[0]));
-				found->removeKey(pos);
+				found->deleteKey(pos);
+				p = nullptr;
+				found->addKey(leafKeys[0]);
 				curr->removeKey(0);
 				int cnt = std::count_if(leafKeys.begin(), leafKeys.end(), [](Process *ptr) { return ptr != nullptr; });
 				//ako je uklonjen poslednji kljuc
