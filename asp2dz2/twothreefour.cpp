@@ -298,7 +298,9 @@ void TwoThreeFour::delKey(Process* p) {
 				}*/
 				curr->deleteKey(pos);
 				p = nullptr;
-				fixupNode(prev, curr);
+				if (std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
+					fixupNode(prev, curr);
+				}
 			}
 			//nije list, spustamo se do inorder sledbenika i spajamo cvorove
 			else {
@@ -314,6 +316,13 @@ void TwoThreeFour::delKey(Process* p) {
 					int cnt = std::count_if(currKeys.begin(), currKeys.end(), [](Process *ptr) {return ptr != nullptr; });
 					if (cnt == 1) {
 						fixupNode(prev, curr);
+					}
+					if (prev == found && found->find(p) == -1) {
+						found = curr;
+						pos = found->find(p);
+						prev = curr;
+						curr = curr->getSons()[pos + 1];
+						continue;
 					}
 					parent = prev;
 					prev = curr;

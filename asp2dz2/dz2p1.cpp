@@ -6,27 +6,18 @@
 int main(void) {
 	TwoThreeFour *tree;
 	//std::string names[26] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-	std::string names[9] = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+	std::string names[11] = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K" };
 	Process *tst = nullptr;
-	Process *in = nullptr;
 
 	tree = new TwoThreeFour();
-	for (int i = 0; i < 9; i++) {
-		if (names[i] == "E") {
-			tst = new Process(names[i], i * 10, i * 10);
-			tst->setWaitingTime(i * 10);
-			tree->addKey(tst);
-		}
-		else {
-			in = new Process(names[i], i * 10, i * 10);
-			in->setWaitingTime(i * 10);
-			tree->addKey(in);
-		}
-
+	for (int i = 0; i < 11; i++) {
+		tst = new Process(names[i], i * 10, i * 10);
+		tst->setWaitingTime(i * 10);
+		tree->addKey(tst);
 	}
 	std::cout << *tree;
 	std::cout << "Deleting" << std::endl;
-	tst = const_cast<Process *>(tree->findKeyWait(50));
+	tst = const_cast<Process *>(tree->findKeyWait(70));
 	tree->delKey(tst);
 	std::cout << *tree;
 	delete tree;
