@@ -195,5 +195,13 @@ int TreeNode::find(Process* p) {
 	return -1;
 }
 
+std::ostream& operator<<(std::ostream &os, const TreeNode &t) {
+	auto keys = t.getKeys();
 
-
+	for (auto key : keys) {
+		if (key != nullptr) {
+			os << *key << std::endl;
+		}
+	}
+	return os;
+}

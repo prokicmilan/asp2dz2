@@ -50,7 +50,7 @@ void Process::updateExecutionTime(const long time) {
 
 std::ostream & operator<<(std::ostream & os, const Process & p)
 {
-	os << p.name << " (" << p.executionTime << ", " << p.waitingTime << ")";
+	os << p.pid << ":" << p.name << " (" << p.executionTime << ", " << p.waitingTime << ")";
 
 	return os;
 }

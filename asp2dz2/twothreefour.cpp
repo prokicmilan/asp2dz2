@@ -299,7 +299,12 @@ void TwoThreeFour::delKey(Process* p) {
 				curr->deleteKey(pos);
 				p = nullptr;
 				if (std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
-					fixupNode(prev, curr);
+					if (curr != root) {
+						fixupNode(prev, curr);
+					}
+					else {
+						root = nullptr;
+					}
 				}
 			}
 			//nije list, spustamo se do inorder sledbenika i spajamo cvorove
@@ -361,16 +366,22 @@ std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 			for (int i = 0; i < cnt; i++) {
 				curr = next.back();
 				next.erase(next.end() - 1);
-				auto keys = curr->getKeys();
+				os << "Kljucevi: " << std::endl;
+				/*auto keys = curr->getKeys();
 				for (auto key : keys) {
 					if (key != nullptr) {
-						os << *key << std::endl;
+						os << "\t" << *key << std::endl;
 					}
-				}
+				}*/
+				os << *curr;
 				auto sons = curr->getSons();
+				if (sons[0] != nullptr) {
+					os << "Deca:" << std::endl;
+				}
 				for (auto son : sons) {
 					if (son != nullptr) {
 						next.insert(next.begin(), son);
+						os << *son;
 						cntNext++;
 					}
 				}

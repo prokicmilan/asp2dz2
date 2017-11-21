@@ -26,6 +26,7 @@ public:
 	void removeSon(int pos);
 	TreeNode* getBrother(TreeNode *parent, bool left);
 	int find(Process *p);
+	friend std::ostream& operator<<(std::ostream &os, const TreeNode &t);
 
 private:
 	std::array<Process*, 3> keys;
