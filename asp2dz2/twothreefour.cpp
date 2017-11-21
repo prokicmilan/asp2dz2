@@ -2,6 +2,7 @@
 
 #include "twothreefour.h"
 #include <vector>
+#include <iostream>
 
 void TwoThreeFour::borrowRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBrother) {
 	int pos;
@@ -65,7 +66,7 @@ void TwoThreeFour::mergeRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBro
 }
 
 void TwoThreeFour::mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBrother) {
-	int pos;
+	unsigned int pos;
 	auto parentKeys = prev->getKeys();
 	auto brotherKeys = leftBrother->getKeys();
 
@@ -140,6 +141,84 @@ void TwoThreeFour::fixupNode(TreeNode *prev, TreeNode *curr) {
 					root = curr;
 				}
 			}
+		}
+	}
+}
+
+void TwoThreeFour::printSons(TreeNode* curr, int pos) const {
+	auto keys = curr->getKeys();
+	auto sons = curr->getSons();
+
+	if (pos == 1) {
+		std::cout << "(L)RED: " << *keys[0] << std::endl;
+		if (keys[2] != nullptr) {
+			std::cout << "(R)RED: " << *keys[2] << std::endl;
+		}
+		else {
+			if (sons[2] != nullptr) {
+				auto sonKeys = sons[2]->getKeys();
+				if (sonKeys[1] != nullptr) {
+					std::cout << "(R)BLACK: " << *sonKeys[1] << std::endl;
+				}
+				else {
+					std::cout << "(R)BLACK: " << *sonKeys[0] << std::endl;
+				}
+			}
+			else {
+				std::cout << "(R) NIL" << std::endl;
+			}
+		}
+	}
+	else if (pos == 0) {
+		if (sons[0] != nullptr) {
+			auto sonKeys = sons[0]->getKeys();
+			if (sonKeys[1] != nullptr) {
+				std::cout << "(L)BLACK: " << *sonKeys[1] << std::endl;
+			}
+			else {
+				std::cout << "(L)BLACK: " << *sonKeys[0] << std::endl;
+			}
+		}
+		else {
+			std::cout << "(L) NIL" << std::endl;
+		}
+		if (sons[1] != nullptr) {
+			auto sonKeys = sons[1]->getKeys();
+			if (sonKeys[1] != nullptr) {
+				std::cout << "(R)BLACK: " << *sonKeys[1] << std::endl;
+			}
+			else {
+				std::cout << "(R)BLACK: " << *sonKeys[0] << std::endl;
+			}
+		}
+		else {
+			std::cout << "(R) NIL" << std::endl;
+		}
+	}
+	else {
+		if (sons[2] != nullptr) {
+			auto sonKeys = sons[2]->getKeys();
+			if (sonKeys[1] != nullptr) {
+				std::cout << "(L)BLACK: " << *sonKeys[1] << std::endl;
+			}
+			else {
+				std::cout << "(L)BLACK: " << *sonKeys[0] << std::endl;
+			}
+		}
+		else {
+			std::cout << "(L) NIL" << std::endl;
+		}
+		if (sons[3] != nullptr) {
+			auto sonKeys = sons[3]->getKeys();
+			if (sonKeys[1] != nullptr) {
+				std::cout << "(R)BLACK: " << *sonKeys[1] << std::endl;
+			}
+			else {
+				std::cout << "(R)BLACK: " << *sonKeys[0] << std::endl;
+			}
+		}
+		else {
+			std::cout << "(R) NIL" << std::endl;
 		}
 	}
 }
@@ -349,6 +428,48 @@ void TwoThreeFour::delKey(Process* p) {
 	}
 }
 
+void TwoThreeFour::printRedBlack() const {
+	int cnt = 0;
+	int cntNext = 0;
+	std::vector<TreeNode*> next;
+	TreeNode *curr = nullptr;
+
+	if (root != nullptr) {
+		next.insert(next.begin(), root);
+		cntNext = 1;
+	}
+	while (!next.empty()) {
+		curr = next.back();
+		next.erase(next.end() - 1);
+		auto keys = curr->getKeys();
+		if (keys[1] != nullptr) {
+			std::cout << "Cvor: " << std::endl;
+			std::cout << "BLACK: " << *keys[1] << std::endl;
+			std::cout << "Deca: " << std::endl;
+			printSons(curr, 1);
+			std::cout << "RED: " << *keys[0] << std::endl;
+			printSons(curr, 0);
+			if (keys[2] != nullptr) {
+				std::cout << "RED: " << *keys[2] << std::endl;
+				printSons(curr, 2);
+			}
+		}
+		else {
+			std::cout << "Cvor: " << std::endl;
+			std::cout << "BLACK: " << *keys[0] << std::endl;
+			std::cout << "Deca: " << std::endl;
+			printSons(curr, 0);
+		}
+		auto sons = curr->getSons();
+		for (auto son : sons) {
+			if (son != nullptr) {
+				next.insert(next.begin(), son);
+				cntNext++;
+			}
+		}
+	}
+}
+
 std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 	int level = 1;
 	int cnt = 0;
@@ -367,12 +488,6 @@ std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 				curr = next.back();
 				next.erase(next.end() - 1);
 				os << "Kljucevi: " << std::endl;
-				/*auto keys = curr->getKeys();
-				for (auto key : keys) {
-					if (key != nullptr) {
-						os << "\t" << *key << std::endl;
-					}
-				}*/
 				os << *curr;
 				auto sons = curr->getSons();
 				if (sons[0] != nullptr) {
@@ -381,7 +496,7 @@ std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
 				for (auto son : sons) {
 					if (son != nullptr) {
 						next.insert(next.begin(), son);
-						os << *son;
+						os << *son << std::endl;
 						cntNext++;
 					}
 				}
