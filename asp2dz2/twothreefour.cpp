@@ -374,7 +374,11 @@ void TwoThreeFour::updateAll(const long time) {
 }
 
 bool TwoThreeFour::isEmpty() const {
-	if (root == nullptr || std::count_if(root->getKeys().begin(), root->getKeys().end(), [](Process *ptr) {return ptr != nullptr; }) == 0) {
+	if (root == nullptr) {
+		return true;
+	}
+	auto keys = root->getKeys();
+	if (std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; }) == 0) {
 		return true;
 	}
 	return false;

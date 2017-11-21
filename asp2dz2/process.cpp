@@ -55,7 +55,7 @@ void Process::updateWaitingTime(const long time) {
 }
 
 long Process::updateExecutionTime(const long time) {
-	if (executionTime + time > timeToComplete) {
+	if (executionTime + time >= timeToComplete) {
 		int res = timeToComplete - executionTime;
 		executionTime = timeToComplete;
 		return res;

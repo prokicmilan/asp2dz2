@@ -72,7 +72,7 @@ void cfs::singleStep(const long timeSlice, const bool rb) {
 			std::cout << "Vreme rada = " << execTime << ". Izvrsava se proces " << *exec << std::endl;
 			update = exec->updateExecutionTime(timeSlice);
 			exec->updateWaitingTime(update);
-			if (exec->getWaitingTime() > exec->getMaxWaitingTime()) {
+			if (exec->getWaitingTime() >= exec->getMaxWaitingTime()) {
 				exec->setWaitingTime(exec->getWaitingTime() - exec->getMaxWaitingTime());
 			}
 			Process *tmp = new Process(*exec);
