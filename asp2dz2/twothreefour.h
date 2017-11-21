@@ -7,6 +7,9 @@ public:
 	~TwoThreeFour();
 	const Process* findKeyWait(const long time) const;
 	const Process* findKeyExec(const long time) const;
+	Process* getMin();
+	void updateAll(const long time);
+	bool isEmpty() const;
 	void addKey(Process *p);
 	void delKey(Process *p);
 	void printRedBlack() const;
@@ -21,4 +24,6 @@ private:
 	void mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBrother);
 	void fixupNode(TreeNode *prev, TreeNode *curr);
 	void printSons(TreeNode *curr, int pos) const;
+	template<typename T>
+	void write(T &t) const;
 };

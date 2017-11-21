@@ -17,10 +17,11 @@ public:
 
 	//setters
 	void setWaitingTime(const long time);
+	void setPid(int pid);
 	
 	//updaters
 	void updateWaitingTime(const long time);
-	void updateExecutionTime(const long time);
+	long updateExecutionTime(const long time);
 
 	//operator overload
 	friend std::ostream& operator<<(std::ostream &os, const Process &p);
@@ -33,4 +34,7 @@ private:
 	long maxWaitingTime;
 	long waitingTime;
 	long executionTime;
+
+	template<typename T>
+	void write(T &t) const;
 };

@@ -18,7 +18,6 @@ void TwoThreeFour::borrowRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBr
 	prev->removeKey(pos);
 	prev->addKey(brotherKeys[0]);
 	rightBrother->removeKey(0);
-	//TODO: prevezi pokazivace
 	curr->setSon(2, rightBrother->getSons()[0]);
 	rightBrother->removeSon(0);
 }
@@ -37,8 +36,6 @@ void TwoThreeFour::borrowLeft(TreeNode* prev, TreeNode* curr, TreeNode* leftBrot
 	}
 	prev->addKey(brotherKeys[pos]);
 	leftBrother->removeKey(pos);
-	//TODO: prevezi pokazivace
-	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
 	curr->moveSons(1);
 	curr->setSon(0, leftBrother->getSons()[pos + 1]);
 	leftBrother->removeSon(pos + 1);
@@ -58,7 +55,6 @@ void TwoThreeFour::mergeRight(TreeNode *prev, TreeNode *curr, TreeNode *rightBro
 	}
 	curr->addKey(parentKeys[pos]);
 	prev->removeKey(pos);
-	//TODO: prevezi pokazivace i obrisi desnog brata
 	curr->setSon(2, rightBrother->getSons()[0]);
 	curr->setSon(3, rightBrother->getSons()[1]);
 	prev->removeSon(pos + 1);
@@ -79,8 +75,6 @@ void TwoThreeFour::mergeLeft(TreeNode *prev, TreeNode *curr, TreeNode *leftBroth
 	}
 	curr->addKey(parentKeys[pos]);
 	prev->removeKey(pos);
-	//TODO: prevezi pokazivace i obrisi levog brata
-	//ovde moze da se pojavi problem, proveri funkciju za pomeranje
 	curr->moveSons(1);
 	curr->moveSons(1);
 	curr->setSon(0, leftBrother->getSons()[0]);
@@ -223,12 +217,49 @@ void TwoThreeFour::printSons(TreeNode* curr, int pos) const {
 	}
 }
 
+template <typename T>
+void TwoThreeFour::write(T &t) const {
+	int level = 1;
+	int cnt;
+	int cntNext;
+	std::vector<TreeNode*> next;
+	TreeNode *curr;
+
+	if (root != nullptr) {
+		next.insert(next.begin(), root);
+		cntNext = 1;
+		while (!next.empty()) {
+			cnt = cntNext;
+			cntNext = 0;
+			t << "Nivo: " << level++ << ":" << std::endl;
+			for (int i = 0; i < cnt; i++) {
+				curr = next.back();
+				//next.erase(next.end() - 1);
+				next.pop_back();
+				t << "Kljucevi: " << std::endl;
+				t << *curr;
+				auto sons = curr->getSons();
+				if (sons[0] != nullptr) {
+					t << "Deca:" << std::endl;
+				}
+				for (auto son : sons) {
+					if (son != nullptr) {
+						next.insert(next.begin(), son);
+						t << *son << std::endl;
+						cntNext++;
+					}
+				}
+			}
+		}
+	}
+}
+
 TwoThreeFour::TwoThreeFour() {
 	root = nullptr;
 }
 
 TwoThreeFour::~TwoThreeFour() {
-	TreeNode *curr = nullptr;
+	TreeNode *curr;
 	std::vector<TreeNode*> next;
 
 	if (root != nullptr) {
@@ -249,7 +280,7 @@ TwoThreeFour::~TwoThreeFour() {
 }
 
 const Process* TwoThreeFour::findKeyWait(const long time) const {
-	TreeNode *curr = nullptr;
+	TreeNode *curr;
 
 	curr = root;
 	while (curr != nullptr && curr->findKeyWait(time) == nullptr) {
@@ -264,7 +295,7 @@ const Process* TwoThreeFour::findKeyWait(const long time) const {
 }
 
 const Process* TwoThreeFour::findKeyExec(const long time) const {
-	TreeNode *curr = nullptr;
+	TreeNode *curr;
 	std::vector<TreeNode*> next;
 
 	if (root != nullptr) {
@@ -289,8 +320,68 @@ const Process* TwoThreeFour::findKeyExec(const long time) const {
 	return nullptr;
 }
 
-void TwoThreeFour::addKey(Process* p) {
+Process* TwoThreeFour::getMin() {
 	TreeNode *curr = nullptr;
+	TreeNode *prev = nullptr;
+
+	curr = root;
+	while (curr != nullptr) {
+		prev = curr;
+		curr = curr->getSons()[0];
+	}
+	return prev->getKeys()[0];
+}
+
+void TwoThreeFour::updateAll(const long time) {
+	std::vector<Process*> critical;
+	std::vector<TreeNode*> next;
+	TreeNode *curr;
+	Process *crit;
+
+	if (root != nullptr) {
+		curr = root;
+		next.insert(next.begin(), curr);
+		while (!next.empty()) {
+			curr = next.back();
+			next.pop_back();
+			auto keys = curr->getKeys();
+			for (auto &key : keys) {
+				if (key != nullptr) {
+					key->updateWaitingTime(time);
+					if (key->getWaitingTime() >= key->getMaxWaitingTime()) {
+						critical.push_back(key);
+					}
+				}
+			}
+			auto sons = curr->getSons();
+			for (auto son : sons) {
+				if (son != nullptr) {
+					next.insert(next.begin(), son);
+				}
+			}
+		}
+	}
+	while(!critical.empty()) {
+		crit = critical.front();
+		Process *tmp = new Process(*crit);
+		int pid = crit->getPid();
+		tmp->setPid(pid);
+		critical.erase(critical.begin());
+		delKey(crit);
+		tmp->setWaitingTime(tmp->getWaitingTime() - tmp->getMaxWaitingTime());
+		addKey(tmp);
+	}
+}
+
+bool TwoThreeFour::isEmpty() const {
+	if (root == nullptr || std::count_if(root->getKeys().begin(), root->getKeys().end(), [](Process *ptr) {return ptr != nullptr; }) == 0) {
+		return true;
+	}
+	return false;
+}
+
+void TwoThreeFour::addKey(Process* p) {
+	TreeNode *curr;
 	TreeNode *prevDel = nullptr;
 	TreeNode *prev = nullptr;
 
@@ -349,7 +440,7 @@ void TwoThreeFour::addKey(Process* p) {
 }
 
 void TwoThreeFour::delKey(Process* p) {
-	TreeNode *curr = nullptr;
+	TreeNode *curr;
 	TreeNode *prev = nullptr;
 
 	if (root != nullptr) {
@@ -391,7 +482,6 @@ void TwoThreeFour::delKey(Process* p) {
 				TreeNode *found = curr;
 				TreeNode *parent = nullptr;
 				int pos = curr->find(p);
-				auto keys = curr->getKeys();
 
 				prev = curr;
 				curr = curr->getSons()[pos + 1];
@@ -429,18 +519,16 @@ void TwoThreeFour::delKey(Process* p) {
 }
 
 void TwoThreeFour::printRedBlack() const {
-	int cnt = 0;
-	int cntNext = 0;
 	std::vector<TreeNode*> next;
-	TreeNode *curr = nullptr;
+	TreeNode *curr;
 
 	if (root != nullptr) {
 		next.insert(next.begin(), root);
-		cntNext = 1;
 	}
 	while (!next.empty()) {
 		curr = next.back();
-		next.erase(next.end() - 1);
+		//next.erase(next.end() - 1);
+		next.pop_back();
 		auto keys = curr->getKeys();
 		if (keys[1] != nullptr) {
 			std::cout << "Cvor: " << std::endl;
@@ -464,46 +552,12 @@ void TwoThreeFour::printRedBlack() const {
 		for (auto son : sons) {
 			if (son != nullptr) {
 				next.insert(next.begin(), son);
-				cntNext++;
 			}
 		}
 	}
 }
 
 std::ostream& operator<<(std::ostream &os, const TwoThreeFour &t) {
-	int level = 1;
-	int cnt = 0;
-	int cntNext = 0;
-	std::vector<TreeNode*> next;
-	TreeNode *curr = nullptr;
-
-	if (t.root != nullptr) {
-		next.insert(next.begin(), t.root);
-		cntNext = 1;
-		while (!next.empty()) {
-			cnt = cntNext;
-			cntNext = 0;
-			os << "Nivo: " << level++ << ":" << std::endl;
-			for (int i = 0; i < cnt; i++) {
-				curr = next.back();
-				next.erase(next.end() - 1);
-				os << "Kljucevi: " << std::endl;
-				os << *curr;
-				auto sons = curr->getSons();
-				if (sons[0] != nullptr) {
-					os << "Deca:" << std::endl;
-				}
-				for (auto son : sons) {
-					if (son != nullptr) {
-						next.insert(next.begin(), son);
-						os << *son << std::endl;
-						cntNext++;
-					}
-				}
-			}
-		}
-	}
+	t.write(os);
 	return os;
 }
-
-

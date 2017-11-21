@@ -21,6 +21,16 @@ void TreeNode::move(TreeNode& tn) {
 	}
 }
 
+template <typename T>
+void TreeNode::write(T& t) const {
+	for (auto key : keys) {
+		if (key != nullptr) {
+			t << *key << std::endl;
+		}
+	}
+}
+
+
 TreeNode::TreeNode() {
 	for (auto &key : keys) {
 		key = nullptr;
@@ -196,12 +206,6 @@ int TreeNode::find(Process* p) {
 }
 
 std::ostream& operator<<(std::ostream &os, const TreeNode &t) {
-	auto keys = t.getKeys();
-
-	for (auto key : keys) {
-		if (key != nullptr) {
-			os << *key << std::endl;
-		}
-	}
+	t.write(os);
 	return os;
 }

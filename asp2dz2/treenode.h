@@ -33,6 +33,8 @@ private:
 	std::array<TreeNode*, 4> sons;
 	void copy(const TreeNode &tn);
 	void move(TreeNode &tn);
+	template<typename T>
+	void write(T &t) const;
 	inline void sort() {
 		for (unsigned int i = 0; i < keys.size() - 1; i++) {
 			for (unsigned int j = i + 1; j < keys.size(); j++) {

@@ -146,11 +146,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cfs.h" />
     <ClInclude Include="process.h" />
     <ClInclude Include="treenode.h" />
     <ClInclude Include="twothreefour.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cfs.cpp" />
     <ClCompile Include="dz2p1.cpp" />
     <ClCompile Include="process.cpp" />
     <ClCompile Include="treenode.cpp" />

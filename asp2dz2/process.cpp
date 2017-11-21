@@ -2,7 +2,13 @@
 
 int Process::prevID = 0;
 
-Process::Process(const std::string & name, long timeToComplete, long maxWaitingTime) {
+template <typename T>
+void Process::write(T& t) const {
+	t << pid << ":" << name << " (" << executionTime << ", " << waitingTime << ")";
+}
+
+
+Process::Process(const std::string & name, const long timeToComplete, const long maxWaitingTime) {
 	this->name = name;
 	this->timeToComplete = timeToComplete;
 	this->maxWaitingTime = maxWaitingTime;
@@ -40,17 +46,26 @@ void Process::setWaitingTime(const long time) {
 	waitingTime = time;
 }
 
+void Process::setPid(int pid) {
+	this->pid = pid;
+}
+
 void Process::updateWaitingTime(const long time) {
 	waitingTime += time;
 }
 
-void Process::updateExecutionTime(const long time) {
-	executionTime += time;
+long Process::updateExecutionTime(const long time) {
+	if (executionTime + time > timeToComplete) {
+		int res = timeToComplete - executionTime;
+		executionTime = timeToComplete;
+		return res;
+	}
+	else {
+		return time;
+	}
 }
 
-std::ostream & operator<<(std::ostream & os, const Process & p)
-{
-	os << p.pid << ":" << p.name << " (" << p.executionTime << ", " << p.waitingTime << ")";
-
+std::ostream& operator<<(std::ostream &os, const Process &p) {
+	p.write(os);
 	return os;
 }
