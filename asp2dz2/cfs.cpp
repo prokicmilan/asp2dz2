@@ -70,24 +70,28 @@ void cfs::singleStep(const long timeSlice, const bool rb) {
 			}
 			exec = tree->getMin();
 			std::cout << "Vreme rada = " << execTime << ". Izvrsava se proces " << *exec << std::endl;
-			update = exec->updateExecutionTime(timeSlice);
-			exec->updateWaitingTime(update);
-			if (exec->getWaitingTime() >= exec->getMaxWaitingTime()) {
-				exec->setWaitingTime(exec->getWaitingTime() - exec->getMaxWaitingTime());
-			}
 			Process *tmp = new Process(*exec);
 			int pid = exec->getPid();
 			tmp->setPid(pid);
 			tree->delKey(exec);
+			update = tmp->updateExecutionTime(timeSlice);
+			tmp->updateWaitingTime(update);
+			if (tmp->getWaitingTime() >= tmp->getMaxWaitingTime()) {
+				tmp->setWaitingTime(exec->getWaitingTime() - tmp->getMaxWaitingTime());
+			}
 			tree->updateAll(update);
 			if (tmp->getExecutionTime() != tmp->getTimeToComplete()) {
 				tree->addKey(tmp);
 			}
-			std::cout << "Nastavak (y/n)?";
-			std::cin >> choice;
-			if (choice != 'y') {
-				stop = true;
+			else {
+				delete tmp;
 			}
+			execTime += update;
+			std::cout << "Nastavak (y/n)?";
+			//std::cin >> choice;
+			//if (choice != 'y') {
+			//	stop = true;
+			//}
 		}
 	}
 }

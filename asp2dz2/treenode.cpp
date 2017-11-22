@@ -168,6 +168,7 @@ void TreeNode::removeSon(int pos) {
 	for (unsigned int i = pos; i < sons.size() - 1; i++) {
 		sons[i] = sons[i + 1];
 	}
+	sons[sons.size() - 1] = nullptr;
 }
 
 

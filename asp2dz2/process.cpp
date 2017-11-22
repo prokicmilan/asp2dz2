@@ -61,6 +61,7 @@ long Process::updateExecutionTime(const long time) {
 		return res;
 	}
 	else {
+		executionTime += time;
 		return time;
 	}
 }
