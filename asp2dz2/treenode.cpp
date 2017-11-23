@@ -89,6 +89,15 @@ const Process* TreeNode::findKeyExec(const long time) const {
 	return nullptr;
 }
 
+TreeNode* TreeNode::getNextWait(const Process* p) const {
+	if (p->getWaitingTime() < keys[0]->getWaitingTime()) {
+		return sons[0];
+	}
+	for (unsigned int i = 0; i < keys.size() - 1; i++) {
+		
+	}
+}
+
 std::array<Process*, 3> TreeNode::getKeys() const {
 	return keys;
 }
