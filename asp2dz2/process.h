@@ -24,6 +24,12 @@ public:
 	long updateExecutionTime(const long time);
 
 	//operator overload
+	bool operator<(const Process &p) const;
+	bool operator<=(const Process &p) const;
+	bool operator>(const Process &p) const;
+	bool operator>=(const Process &p) const;
+	bool operator==(const Process &p) const;
+	bool operator!=(const Process &p) const;
 	friend std::ostream& operator<<(std::ostream &os, const Process &p);
 
 private:

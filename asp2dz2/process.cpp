@@ -66,6 +66,30 @@ long Process::updateExecutionTime(const long time) {
 	}
 }
 
+bool Process::operator<(const Process &p) const {
+	return waitingTime < p.getWaitingTime();
+}
+
+bool Process::operator<=(const Process &p) const {
+	return !(*this > p);
+}
+
+bool Process::operator>(const Process &p) const {
+	return p < *this;
+}
+
+bool Process::operator>=(const Process &p) const {
+	return !(*this < p);
+}
+
+bool Process::operator==(const Process &p) const {
+	return waitingTime == p.getWaitingTime();
+}
+
+bool Process::operator!=(const Process &p) const {
+	return !(*this == p);
+}
+
 std::ostream& operator<<(std::ostream &os, const Process &p) {
 	p.write(os);
 	return os;

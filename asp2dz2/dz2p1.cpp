@@ -19,9 +19,10 @@ int main(void) {
 		p->setWaitingTime(i);
 		tree->addKey(p);
 	}
-	instance = cfs::getInstance();
-	instance->setTree(tree);
-	instance->singleStep(10);
+	cout << *tree << endl;
+	//instance = cfs::getInstance();
+	//instance->setTree(tree);
+	//instance->singleStep(10);
 
 	return 0;
 }
