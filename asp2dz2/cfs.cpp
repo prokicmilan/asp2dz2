@@ -77,7 +77,7 @@ void cfs::singleStep(const long timeSlice, const bool rb) {
 			update = tmp->updateExecutionTime(timeSlice);
 			tmp->updateWaitingTime(update);
 			if (tmp->getWaitingTime() >= tmp->getMaxWaitingTime()) {
-				tmp->setWaitingTime(tmp->getWaitingTime() - tmp->getMaxWaitingTime());
+				tmp->setWaitingTime(exec->getWaitingTime() - tmp->getMaxWaitingTime());
 			}
 			tree->updateAll(update);
 			if (tmp->getExecutionTime() != tmp->getTimeToComplete()) {
@@ -87,13 +87,11 @@ void cfs::singleStep(const long timeSlice, const bool rb) {
 				delete tmp;
 			}
 			execTime += update;
-			if (!tree->isEmpty()) {
-				std::cout << "Nastavak (y/n)?";
-				std::cin >> choice;
-				if (choice != 'y') {
-					stop = true;
-				}
-			}
+			std::cout << "Nastavak (y/n)?";
+			//std::cin >> choice;
+			//if (choice != 'y') {
+			//	stop = true;
+			//}
 		}
 	}
 }

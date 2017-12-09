@@ -14,7 +14,6 @@ public:
 
 	const Process* findKeyWait(const long time) const;
 	const Process* findKeyExec(const long time) const;
-	TreeNode* getNextWait(const Process *p) const;
 	TreeNode* getNextWait(const long time) const;
 	std::array<Process*, 3> getKeys() const;
 	std::array<TreeNode*, 4> getSons() const;

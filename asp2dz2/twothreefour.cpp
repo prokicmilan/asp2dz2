@@ -458,13 +458,18 @@ void TwoThreeFour::delKey(Process* p) {
 				}
 			}
 			prev = curr;
-			curr = curr->getNextWait(p);
+			curr = curr->getNextWait(p->getWaitingTime());
 		}
 		if (curr != nullptr) {
 			//ako je list
 			if (curr->getSons()[0] == nullptr) {
 				auto keys = curr->getKeys();
 				int pos = curr->find(p);
+				/*for (pos = 0; pos < keys.size(); pos++) {
+					if (keys[pos] == p) {
+						break;
+					}
+				}*/
 				curr->deleteKey(pos);
 				p = nullptr;
 				if (std::count_if(keys.begin(), keys.end(), [](Process *ptr) { return ptr != nullptr; }) - 1 == 0) {
